@@ -2,7 +2,7 @@
 context: "context"
 origin: "origin"
 projects:
-  - name: "projectA"
+  - name: "projectB"
     topics:
       - name: "foo"
         config:
