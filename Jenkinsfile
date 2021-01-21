@@ -1,21 +1,24 @@
-podTemplate(
-    name: 'p3-kafka-topology-builder',
-    serviceAccount : 'jenkins',
-    containers: [
-        containerTemplate(name: 'worker', image: 'purbon/kafka-topology-builder:latest', command: 'cat', ttyEnabled: true),
-        )
+pipeline {
 
-node("p3-kafka-topology-builder"){
+    agent {
+      docker { image 'purbon/kafka-topology-builder:latest' }
+    }
+
+   stages {
         stage ('Checkout') {
-            checkout scm
-            withCredentials([usernamePassword(credentialsId: 'confluent-cloud', usernameVariable: 'CLUSTER_API_KEY', passwordVariable: 'CLUSTER_API_SECRET')])
+        checkout scm: [
+            $class: 'GitSCM', 
+            branches: [[name: '*/master']], 
+            userRemoteConfigs: [[credentialsId: 'git-prv', url: 'https://github.com/mokia-unzer/kafka-topology.git']]]
 
-        stages {
-              stage('run') {
-                steps {
-                       {
-                        sh './demo/build-connection-file.sh > topology-builder.properties'
-                       }
-                      sh 'kafka-topology-builder.sh --clientConfig topology-builder.properties --topology ${TopologyFiles} --allowDelete'
-                  }
+        } 
+        stage('run') {
+          steps {
+              withCredentials([usernamePassword(credentialsId: 'confluent-cloud', usernameVariable: 'CLUSTER_API_KEY', passwordVariable: 'CLUSTER_API_SECRET')]) {
+                sh './demo/build-connection-file.sh > topology-builder.properties'
               }
+              sh 'kafka-topology-builder.sh --clientConfig topology-builder.properties --topology ${TopologyFiles} --allowDelete'
+          }
+        }
+   }
+}
