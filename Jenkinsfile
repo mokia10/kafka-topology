@@ -12,7 +12,7 @@ pipeline {
                   sh 'chmod +x ./demo/build-connection-file.sh'
                   sh './demo/build-connection-file.sh > topology-builder.properties'
               }
-              sh 'kafka-topology-builder.sh --clientConfig topology-builder.properties --topology ${TopologyFiles} --allowDelete'
+              sh 'kafka-topology-builder.sh --clientConfig topology-builder.properties --topology topology.yaml --allowDelete'
           }
         }
    }
